@@ -1,0 +1,9 @@
+node_modules
+coverage
+test
+src
+img
+tsconfig.json
+jest.config.js
+.eslintrc
+.eslintignore

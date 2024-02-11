@@ -17,6 +17,8 @@ export interface IBaseConnectionOpts {
   // TODO: attempt to type dynamic driver
   driver?: any;
 
+  name: string;
+
   topic?: string;
 
   protocol: 'amqp' | 'mqtt' | 'kafka';

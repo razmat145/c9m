@@ -5,6 +5,7 @@ import type { Connection, Channel } from 'amqplib';
 import {
   IBaseConnectionOpts,
   IDriverDependentSubscriptionOpts,
+  IHandlers,
 } from '../types';
 
 export class AMQPConnection extends BaseConnection {
@@ -18,7 +19,13 @@ export class AMQPConnection extends BaseConnection {
   public override async connect(): Promise<void> {
     try {
       this.opts.logger.debug('Connecting to AMQP broker..');
-      this.connection = await this.opts.driver.connect(this.opts);
+      this.connection = await this.opts.driver.connect({
+        protocol: 'amqp',
+        hostname: this.opts.host,
+        port: this.opts.port,
+        username: this.opts.username,
+        password: this.opts.password,
+      });
 
       this.channel = await this.connection.createChannel();
       this.opts.logger.debug('Connected to AMQP broker');
@@ -33,10 +40,7 @@ export class AMQPConnection extends BaseConnection {
 
   public override async subscribe<T extends IDriverDependentSubscriptionOpts>(
     topic: string,
-    callback: (
-      message: Buffer,
-      handles?: { ack: Function; reject: Function }
-    ) => Promise<void>,
+    callback: (message: Buffer, handles?: IHandlers) => Promise<void>,
     subscriptionOpts?: T
   ): Promise<void> {
     // TODO: implement auto-bind to exchange
@@ -46,11 +50,11 @@ export class AMQPConnection extends BaseConnection {
     await this.channel.consume(topic, async (msg) => {
       if (msg) {
         await callback(msg.content, {
-          ack: () => {
-            this.channel.ack(msg);
+          ack: async () => {
+            await this.channel.ack(msg);
           },
           reject: async () => {
-            this.channel.reject(msg, false);
+            await this.channel.reject(msg, false);
           },
         });
       }

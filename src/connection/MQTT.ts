@@ -2,9 +2,7 @@ import type { MqttClient } from 'mqtt';
 
 import { BaseConnection } from './Base';
 
-import {
-  IBaseConnectionOpts,
-} from '../types';
+import { IBaseConnectionOpts, IHandlers } from '../types';
 
 export class MQTTConnection extends BaseConnection {
   protected client: MqttClient;
@@ -32,10 +30,7 @@ export class MQTTConnection extends BaseConnection {
 
   public override async subscribe(
     topic: string,
-    callback: (
-      message: Buffer,
-      handles?: { ack: Function; reject: Function }
-    ) => Promise<void>
+    callback: (message: Buffer, handles?: IHandlers) => Promise<void>
   ): Promise<void> {
     this.opts.logger.debug(`Subscribing to topic: ${topic}`);
     this.client.on('message', async (topic, message) => {

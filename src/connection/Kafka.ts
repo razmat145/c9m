@@ -1,6 +1,6 @@
 import { BaseConnection } from './Base';
 
-import type { ConsumerConfig, Consumer, Kafka } from 'kafkajs';
+import type { Consumer, Kafka, logLevel } from 'kafkajs';
 
 import {
   IBaseConnectionOpts,
@@ -18,12 +18,17 @@ export class KafkaConnection extends BaseConnection {
 
   public override async connect(): Promise<void> {
     try {
-      this.kafka = await this.opts.driver.Kafka.create({
-        // brokers: this.opts?.brokers,
+      this.kafka = new this.opts.driver.Kafka({
+        brokers: [`${this.opts.host}:${this.opts.port}`],
+        logLevel: 0,
+        // sasl: {
+        //   mechanism: 'plain',
+        //   username: this.opts.username,
+        //   password: this.opts.password,
+        // },
       });
 
-      // TODO: config this
-      this.consumer = this.kafka.consumer({ groupId: 'test-group' });
+      this.consumer = this.kafka.consumer({ groupId: this.opts.name });
 
       await this.consumer.connect();
 
@@ -56,7 +61,30 @@ export class KafkaConnection extends BaseConnection {
     ) => Promise<void>,
     subscriptionOpts?: T
   ): Promise<void> {
-    //
+    try {
+      await this.consumer.subscribe({ topic });
+
+      await this.consumer.run({
+        eachMessage: async ({ topic, partition, message }) => {
+          await callback(message.value as Buffer, {
+            ack: () => {
+              this.consumer.commitOffsets([
+                { topic, partition, offset: message.offset },
+              ]);
+            },
+            reject: () => {
+              this.consumer.commitOffsets([
+                { topic, partition, offset: message.offset },
+              ]);
+              // TODO:
+              // this.consumer.seek({ topic, partition, offset: message.offset });
+            },
+          });
+        },
+      });
+    } catch (err) {
+      this.opts.logger.error(`Kafka subscription error: ${err.message}`);
+    }
   }
 
   public override async disconnect(): Promise<void> {

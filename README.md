@@ -9,7 +9,7 @@ Compromises have to be made in order to provide a common interface for message c
 ### Installing
 
 ```
-npm install --save c9m
+npm install --save c9ms
 ```
 
 ### Usage
@@ -17,7 +17,7 @@ npm install --save c9m
 Given a naive `WorkerBehaviour` extension
 
 ```typescript
-import { WorkerBehaviour } from 'c9m';
+import { WorkerBehaviour } from 'c9ms';
 
 class MyWorker extends WorkerBehaviour {
   public async onMessage(message: Buffer, handlers): Promise<void> {
@@ -89,7 +89,7 @@ Note: the handling logic of the message never actually changed, only the initial
 A producer can be initialised in the same way
 
 ```typescript
-import { Producer } from 'c9m';
+import { Producer } from 'c9ms';
 ```
 
 MQTT e.g.

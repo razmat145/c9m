@@ -56,4 +56,10 @@ export class MQTTConnection extends BaseConnection {
     await this.client.endAsync(true);
     this.opts.logger.debug('Disconnected from MQTT broker');
   }
+
+  public override async publish(topic: string, message: Buffer): Promise<void> {
+    this.opts.logger.debug(`Publishing to topic: ${topic}`);
+    await this.client.publishAsync(topic, message, { qos: 2 });
+    this.opts.logger.debug(`Published to topic: ${topic}`);
+  }
 }

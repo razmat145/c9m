@@ -1,6 +1,6 @@
 import { BaseConnection } from './Base';
 
-import type { Consumer, Kafka, logLevel } from 'kafkajs';
+import type { Consumer, Kafka } from 'kafkajs';
 
 import {
   IBaseConnectionOpts,
@@ -20,12 +20,12 @@ export class KafkaConnection extends BaseConnection {
     try {
       this.kafka = new this.opts.driver.Kafka({
         brokers: [`${this.opts.host}:${this.opts.port}`],
-        logLevel: 0,
-        // sasl: {
-        //   mechanism: 'plain',
-        //   username: this.opts.username,
-        //   password: this.opts.password,
-        // },
+        // logLevel: 0,
+        sasl: {
+          mechanism: 'plain',
+          username: this.opts.username,
+          password: this.opts.password,
+        },
       });
 
       this.consumer = this.kafka.consumer({ groupId: this.opts.name });
@@ -93,5 +93,14 @@ export class KafkaConnection extends BaseConnection {
     await this.consumer.disconnect();
 
     this.opts.logger.debug('Disconnected from Kafka broker');
+  }
+
+  public override async publish(topic: string, message: Buffer): Promise<void> {
+    this.opts.logger.debug(`Publishing to topic: ${topic}`);
+    await this.kafka.producer().send({
+      topic,
+      messages: [{ value: message }],
+    });
+    this.opts.logger.debug(`Published to topic: ${topic}`);
   }
 }

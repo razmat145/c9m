@@ -82,4 +82,11 @@ export class AMQPConnection extends BaseConnection {
     await this.connection.close();
     this.opts.logger.debug('Disconnected from AMQP broker');
   }
+
+  public override async publish(topic: string, message: Buffer): Promise<void> {
+    this.opts.logger.debug(`Publishing to topic: ${topic}`);
+    await this.channel.assertQueue(topic);
+    await this.channel.sendToQueue(topic, message);
+    this.opts.logger.debug(`Published to topic: ${topic}`);
+  }
 }

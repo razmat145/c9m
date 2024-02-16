@@ -1,6 +1,6 @@
 import { EventEmitter } from 'events';
 
-import { IBaseConnection, IDriverDependentSubscriptionOpts } from '../types';
+import { IBaseConnection } from '../types';
 
 const INITIAL_BACKOFF_DELAY = 1_000;
 const MAX_BACKOFF_DELAY = 60_000;
@@ -22,6 +22,8 @@ export abstract class BaseConnection
   public abstract connect(): Promise<void>;
 
   public abstract disconnect(): Promise<void>;
+
+  public abstract publish(topic: string, message: Buffer): Promise<void>;
 
   public abstract subscribe(
     topic: string,

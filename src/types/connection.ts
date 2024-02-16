@@ -45,5 +45,5 @@ export interface ILogger {
 }
 
 export interface IDriverDependentSubscriptionOpts {
-  //
+  // TODO:
 }

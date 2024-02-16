@@ -14,7 +14,10 @@
   },
   "keywords": [
     "typescript",
-    "node"
+    "node",
+    "consumers",
+    "pub/sub",
+    "workers"
   ],
   "author": "Razvan Matei (monakyo@gmail.com)",
   "license": "Apache-2.0",
